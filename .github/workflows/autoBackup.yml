@@ -38,24 +38,24 @@ jobs:
       - name: 输出最新时间戳
         run: echo "${{ steps.newTimeStamp.outputs.first_match }}"
 
-      # - name: 获取上一次备份的时间戳
-      #   id: lastTime
-      #   run: |
-      #     echo wget -O https://github.com/callacat/Docker-test/releases/download/latest/compile_time.go
+      - name: 获取上一次备份的时间戳
+        id: lastTime
+        run: |
+          echo wget -O https://github.com/callacat/sillyGirl-Backup/releases/download/latest/compile_time.go
         
-      # - name: 读取上一次compile_time.go文件内容保存到变量
-      #   id: readLastContent
-      #   uses: juliangruber/read-file-action@v1
-      #   with:
-      #     path: ./compile_time.go
+      - name: 读取上一次compile_time.go文件内容保存到变量
+        id: readLastContent
+        uses: juliangruber/read-file-action@v1
+        with:
+          path: ./compile_time.go
 
-      # - name: 查找上次时间戳
-      #   id: lastTimeStamp
-      #   uses: AsasInnab/regex-action@v1
-      #   with:
-      #     regex_pattern: '\"[0-9]+\"'
-      #     regex_flags: 'gim'
-      #     search_string: '${{ steps.readLastContent.outputs.content }}'
+      - name: 查找上次时间戳
+        id: lastTimeStamp
+        uses: AsasInnab/regex-action@v1
+        with:
+          regex_pattern: '\"[0-9]+\"'
+          regex_flags: 'gim'
+          search_string: '${{ steps.readLastContent.outputs.content }}'
 
       - name: 输出上次时间戳
         run: echo "${{ steps.lastTimeStamp.outputs.first_match }}"
@@ -63,7 +63,7 @@ jobs:
       #如果最新获取的时间戳不等于上次保存的时间戳则上传到Release
       - name: 作为最新上传
         uses: "marvinpinto/action-automatic-releases@latest"
-        # if: ${{ steps.newTimeStamp.outputs.first_match = steps.lastTimeStamp.outputs.first_match }}
+        if: ${{ steps.newTimeStamp.outputs.first_match != steps.lastTimeStamp.outputs.first_match }}
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           automatic_release_tag: "latest"
@@ -73,7 +73,7 @@ jobs:
       #如果最新获取的时间戳不等于上次保存的时间戳则上传到Release
       - name: 作为备份上传
         uses: "marvinpinto/action-automatic-releases@latest"
-        # if: ${{ steps.newTimeStamp.outputs.first_match = steps.lastTimeStamp.outputs.first_match }}
+        if: ${{ steps.newTimeStamp.outputs.first_match != steps.lastTimeStamp.outputs.first_match }}
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: false

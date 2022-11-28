@@ -31,7 +31,7 @@ jobs:
         id: newTimeStamp
         uses: AsasInnab/regex-action@v1
         with:
-          regex_pattern: '\"[0-9]+\"'
+          regex_pattern: '[0-9]+'
           regex_flags: 'gim'
           search_string: '${{ steps.readNewContent.outputs.content }}'
 
@@ -53,7 +53,7 @@ jobs:
         id: lastTimeStamp
         uses: AsasInnab/regex-action@v1
         with:
-          regex_pattern: '\"[0-9]+\"'
+          regex_pattern: '[0-9]+'
           regex_flags: 'gim'
           search_string: '${{ steps.readLastContent.outputs.content }}'
 

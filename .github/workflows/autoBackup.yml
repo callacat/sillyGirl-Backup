@@ -7,6 +7,7 @@ on:
     types: [started]
   schedule:
     - cron: 0 */6 * * *
+
 jobs:
 
   judge:
@@ -16,9 +17,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: 获取最新文件
+      - name: 获取新旧文件
         run: |
-          wget -q https://raw.githubusercontent.com/cdle/binary/main/compile_time.go
+          wget -q https://raw.githubusercontent.com/cdle/binary/main/compile_time.go -O newTime.txt
+          wget -q https://github.com/callacat/sillyGirl-Backup/releases/download/latest/compile_time.go -O lastTime.txt
           git clone https://github.com/cdle/binary.git
           ls -R
          
@@ -26,7 +28,7 @@ jobs:
         id: readNewContent
         uses: juliangruber/read-file-action@v1
         with:
-          path: ./compile_time.go
+          path: ./newTime.txt
 
       - name: 查找最新时间戳
         id: newTimeStamp
@@ -37,18 +39,14 @@ jobs:
           search_string: '${{ steps.readNewContent.outputs.content }}'
 
       - name: 输出最新时间戳
-        run: echo "${{ steps.newTimeStamp.outputs.first_match }}"
-
-      - name: 获取上一次备份的时间戳
-        id: lastTime
         run: |
-          echo wget -O https://github.com/callacat/sillyGirl-Backup/releases/download/latest/compile_time.go
-        
+          echo "${{ steps.newTimeStamp.outputs.first_match }}"
+    
       - name: 读取上一次compile_time.go文件内容保存到变量
         id: readLastContent
         uses: juliangruber/read-file-action@v1
         with:
-          path: ./compile_time.go
+          path: ./lastTime.txt
 
       - name: 查找上次时间戳
         id: lastTimeStamp
@@ -59,17 +57,8 @@ jobs:
           search_string: '${{ steps.readLastContent.outputs.content }}'
 
       - name: 输出上次时间戳
-        run: echo "${{ steps.lastTimeStamp.outputs.first_match }}"
-
-      #如果最新获取的时间戳不等于上次保存的时间戳则上传到Release
-      - name: 作为最新上传
-        uses: "marvinpinto/action-automatic-releases@latest"
-        if: ${{ steps.newTimeStamp.outputs.first_match != steps.lastTimeStamp.outputs.first_match }}
-        with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "latest"
-          prerelease: false
-          files: binary/
+        run: |
+            echo "${{ steps.lastTimeStamp.outputs.first_match }}"
 
       #如果最新获取的时间戳不等于上次保存的时间戳则上传到Release
       - name: 作为备份上传
@@ -79,5 +68,27 @@ jobs:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: false
           title: "版本号${{ steps.newTimeStamp.outputs.first_match }}"
-          automatic_release_tag: "傻妞备份"
+          automatic_release_tag: "backup"
           files: binary/
+
+      #如果最新获取的时间戳不等于上次保存的时间戳则上传到Release
+      - name: 作为最新上传
+        uses: "marvinpinto/action-automatic-releases@latest"
+        if: ${{ steps.newTimeStamp.outputs.first_match != steps.lastTimeStamp.outputs.first_match }}
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          title: "最新版傻妞"
+          automatic_release_tag: "latest"
+          prerelease: false
+          files: binary/
+
+  del_runs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete workflow runs
+        uses: Mattraks/delete-workflow-runs@v2
+        with:
+          token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          retain_days: 10
+          keep_minimum_runs: 5

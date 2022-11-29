@@ -24,7 +24,7 @@ jobs:
           git clone https://github.com/cdle/binary.git
           ls -R
          
-      - name: 读取最新compile_time.go文件内容保存到变量
+      - name: 读取最新compile_time.go文件内容
         id: readNewContent
         uses: juliangruber/read-file-action@v1
         with:
@@ -42,7 +42,7 @@ jobs:
         run: |
           echo "${{ steps.newTimeStamp.outputs.first_match }}"
     
-      - name: 读取上一次compile_time.go文件内容保存到变量
+      - name: 读取上一次compile_time.go文件内容
         id: readLastContent
         uses: juliangruber/read-file-action@v1
         with:
@@ -60,6 +60,28 @@ jobs:
         run: |
             echo "${{ steps.lastTimeStamp.outputs.first_match }}"
 
+      - name: 格式化时间戳
+        run: |
+          sh ./Operation.sh > ./date.txt
+          cat ./date.txt
+
+      - name: 读取date.txt文件内容
+        id: readDateContent
+        uses: juliangruber/read-file-action@v1
+        with:
+          path: ./date.txt
+
+      - name: 取出日期
+        id: creatDate
+        uses: AsasInnab/regex-action@v1
+        with:
+          regex_pattern: '.+'
+          regex_flags: 'gim'
+          search_string: '${{ steps.readDateContent.outputs.content }}'
+
+      - name: 输出日期
+        run: echo "${{ steps.creatDate.outputs.first_match }}"
+
       #如果最新获取的时间戳不等于上次保存的时间戳则上传到Release
       - name: 作为备份上传
         uses: "marvinpinto/action-automatic-releases@latest"
@@ -67,8 +89,8 @@ jobs:
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: false
-          title: "${{ steps.newTimeStamp.outputs.first_match }}"
-          automatic_release_tag: "${{ steps.newTimeStamp.outputs.first_match }}"
+          title: "备份日期${{ steps.creatDate.outputs.first_match }}"
+          automatic_release_tag: "版本号${{ steps.newTimeStamp.outputs.first_match }}"
           files: binary/
 
       #如果最新获取的时间戳不等于上次保存的时间戳则上传到Release

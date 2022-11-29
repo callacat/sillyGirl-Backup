@@ -6,7 +6,7 @@ on:
   watch:
     types: [started]
   schedule:
-    - cron: 0 */6 * * *
+    - cron: 10 */6 * * *
 
 jobs:
 
@@ -67,8 +67,8 @@ jobs:
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: false
-          title: "版本号${{ steps.newTimeStamp.outputs.first_match }}"
-          automatic_release_tag: "backup"
+          title: "${{ steps.newTimeStamp.outputs.first_match }}"
+          automatic_release_tag: "${{ steps.newTimeStamp.outputs.first_match }}"
           files: binary/
 
       #如果最新获取的时间戳不等于上次保存的时间戳则上传到Release

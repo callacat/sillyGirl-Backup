@@ -24,6 +24,9 @@ jobs:
           creatDate=$((v/1000))
           echo "compile_time=$(date '+%Y-%m-%d' -d @$creatDate)"  >> $GITHUB_ENV
 
+      - name: 获取最新文件
+        run: git clone https://github.com/cdle/binary.git
+
       - name: 作为备份上传
         uses: "marvinpinto/action-automatic-releases@latest"
         with:

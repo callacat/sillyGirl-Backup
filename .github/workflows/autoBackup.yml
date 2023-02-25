@@ -2,11 +2,11 @@ name: autoBackup
 
 on:
   push:
-    branches: [ main ]
-  watch:
-    types: [started]
-  schedule:
-    - cron: 10 */6 * * *
+    paths:
+      - '.github/workflows/autoBackup.yml'
+    repositories:
+      - owner: binary
+        name: cdle
 
 jobs:
 
@@ -17,86 +17,24 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: 获取新旧文件
-        run: |
-          wget -q https://raw.githubusercontent.com/cdle/binary/main/compile_time.go -O newTime.txt
-          wget -q https://github.com/callacat/sillyGirl-Backup/releases/download/latest/compile_time.go -O lastTime.txt
-          git clone https://github.com/cdle/binary.git
-          ls -R
-         
-      - name: 读取最新compile_time.go文件内容
-        id: readNewContent
-        uses: juliangruber/read-file-action@v1
-        with:
-          path: ./newTime.txt
+    - name: 获取更新日期
+      run: |
+        v=`curl https://raw.githubusercontent.com/cdle/binary/main/compile_time.go --silent | tr -cd "[0-9]"`
+        echo "version=v" >> $GITHUB_ENV
+        creatDate=$((v/1000))
+        echo "compile_time=$(date '+%Y-%m-%d' -d @$creatDate)"  >> $GITHUB_ENV
 
-      - name: 查找最新时间戳
-        id: newTimeStamp
-        uses: AsasInnab/regex-action@v1
-        with:
-          regex_pattern: '[0-9]+'
-          regex_flags: 'gim'
-          search_string: '${{ steps.readNewContent.outputs.content }}'
-
-      - name: 输出最新时间戳
-        run: |
-          echo "${{ steps.newTimeStamp.outputs.first_match }}"
-    
-      - name: 读取上一次compile_time.go文件内容
-        id: readLastContent
-        uses: juliangruber/read-file-action@v1
-        with:
-          path: ./lastTime.txt
-
-      - name: 查找上次时间戳
-        id: lastTimeStamp
-        uses: AsasInnab/regex-action@v1
-        with:
-          regex_pattern: '[0-9]+'
-          regex_flags: 'gim'
-          search_string: '${{ steps.readLastContent.outputs.content }}'
-
-      - name: 输出上次时间戳
-        run: |
-            echo "${{ steps.lastTimeStamp.outputs.first_match }}"
-
-      - name: 格式化时间戳
-        run: |
-          sh ./Operation.sh > ./date.txt
-          cat ./date.txt
-
-      - name: 读取date.txt文件内容
-        id: readDateContent
-        uses: juliangruber/read-file-action@v1
-        with:
-          path: ./date.txt
-
-      - name: 取出日期
-        id: creatDate
-        uses: AsasInnab/regex-action@v1
-        with:
-          regex_pattern: '.+'
-          regex_flags: 'gim'
-          search_string: '${{ steps.readDateContent.outputs.content }}'
-
-      - name: 输出日期
-        run: echo "${{ steps.creatDate.outputs.first_match }}"
-
-      #如果最新获取的时间戳不等于上次保存的时间戳则上传到Release
       - name: 作为备份上传
         uses: "marvinpinto/action-automatic-releases@latest"
-        if: ${{ steps.newTimeStamp.outputs.first_match != steps.lastTimeStamp.outputs.first_match }}
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: false
-          title: "备份日期${{ steps.creatDate.outputs.first_match }}"
-          automatic_release_tag: "版本号${{ steps.newTimeStamp.outputs.first_match }}"
+          title: "备份日期${{ env.compile_time }}"
+          automatic_release_tag: "版本号${{ env.version }}"
           files: binary/
 
-      #如果最新获取的时间戳不等于上次保存的时间戳则上传到Release
       - name: 作为最新上传
         uses: "marvinpinto/action-automatic-releases@latest"
-        if: ${{ steps.newTimeStamp.outputs.first_match != steps.lastTimeStamp.outputs.first_match }}
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           title: "最新版傻妞"

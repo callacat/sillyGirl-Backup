@@ -2,8 +2,8 @@ name: autoBackup
 
 on:
   push:
-    paths:
-      - '.github/workflows/autoBackup.yml'
+    # paths:
+    #   - '.github/workflows/autoBackup.yml'
     repositories:
       - owner: binary
         name: cdle

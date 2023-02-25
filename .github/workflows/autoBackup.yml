@@ -17,12 +17,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-    - name: 获取更新日期
-      run: |
-        v=`curl https://raw.githubusercontent.com/cdle/binary/main/compile_time.go --silent | tr -cd "[0-9]"`
-        echo "version=v" >> $GITHUB_ENV
-        creatDate=$((v/1000))
-        echo "compile_time=$(date '+%Y-%m-%d' -d @$creatDate)"  >> $GITHUB_ENV
+      - name: 获取更新日期
+        run: |
+          v=`curl https://raw.githubusercontent.com/cdle/binary/main/compile_time.go --silent | tr -cd "[0-9]"`
+          echo "version=v" >> $GITHUB_ENV
+          creatDate=$((v/1000))
+          echo "compile_time=$(date '+%Y-%m-%d' -d @$creatDate)"  >> $GITHUB_ENV
 
       - name: 作为备份上传
         uses: "marvinpinto/action-automatic-releases@latest"

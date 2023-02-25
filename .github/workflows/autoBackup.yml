@@ -10,7 +10,7 @@ on:
 
 jobs:
 
-  judge:
+  backup:
 
     runs-on: ubuntu-latest
 
@@ -20,7 +20,7 @@ jobs:
       - name: 获取更新日期
         run: |
           v=`curl https://raw.githubusercontent.com/cdle/binary/main/compile_time.go --silent | tr -cd "[0-9]"`
-          echo "version=v" >> $GITHUB_ENV
+          echo "version=$v" >> $GITHUB_ENV
           creatDate=$((v/1000))
           echo "compile_time=$(date '+%Y-%m-%d' -d @$creatDate)"  >> $GITHUB_ENV
 

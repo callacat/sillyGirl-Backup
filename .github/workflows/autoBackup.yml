@@ -4,9 +4,8 @@ on:
   push:
     # paths:
     #   - '.github/workflows/autoBackup.yml'
-    repositories:
-      - owner: binary
-        name: cdle
+  repository_dispatch:
+    types: [backup]
 
 jobs:
 
@@ -44,14 +43,3 @@ jobs:
           automatic_release_tag: "latest"
           prerelease: false
           files: binary/
-
-  del_runs:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Delete workflow runs
-        uses: Mattraks/delete-workflow-runs@v2
-        with:
-          token: ${{ github.token }}
-          repository: ${{ github.repository }}
-          retain_days: 9
-          keep_minimum_runs: 5

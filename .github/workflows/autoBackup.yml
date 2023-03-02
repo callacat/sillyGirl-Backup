@@ -50,5 +50,5 @@ jobs:
           allowUpdates: "true"
           name: "最新版傻妞"
           tag: "latest"
-          bodyFile: "binary/"
+          artifacts: "binary/"
           token: ${{ secrets.GITHUB_TOKEN }}

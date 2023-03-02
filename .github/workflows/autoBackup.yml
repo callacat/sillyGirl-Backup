@@ -1,9 +1,9 @@
 name: autoBackup
 
 on:
-  push:
-    paths:
-      - '.github/workflows/autoBackup.yml'
+  # push:
+  #   paths:
+  #     - '.github/workflows/autoBackup.yml'
   repository_dispatch:
     types: [backup]
 
@@ -26,23 +26,14 @@ jobs:
       - name: 获取最新文件
         run: git clone https://github.com/cdle/binary.git
 
-      # - name: 作为备份上传
-      #   uses: "marvinpinto/action-automatic-releases@v2"
-      #   with:
-      #     repo_token: "${{ secrets.GITHUB_TOKEN }}"
-      #     prerelease: false
-      #     title: "备份日期${{ env.compile_time }}"
-      #     automatic_release_tag: "版本号${{ env.version }}"
-      #     files: binary/
-
-      # - name: 作为最新上传
-      #   uses: "marvinpinto/action-automatic-releases@v2"
-      #   with:
-      #     repo_token: "${{ secrets.GITHUB_TOKEN }}"
-      #     title: "最新版傻妞"
-      #     automatic_release_tag: "latest"
-      #     prerelease: false
-      #     files: binary/
+      - name: 作为备份上传
+        uses: ncipollo/release-action@v1
+        with:
+          allowUpdates: "true"
+          name: "备份日期${{ env.compile_time }}"
+          tag: "版本号${{ env.version }}"
+          artifacts: "binary/*"
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 作为最新发布
         uses: ncipollo/release-action@v1

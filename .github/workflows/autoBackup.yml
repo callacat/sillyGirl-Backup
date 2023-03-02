@@ -52,5 +52,5 @@ jobs:
           tag_name: latest
           release_name: "最新版傻妞"
           body_mrkdwn: ""
-          assets: binary/
+          assets: binary/*
           github_token: ${{ github.token }}

@@ -44,13 +44,11 @@ jobs:
       #     prerelease: false
       #     files: binary/
 
-      - name: 作为最新上传 
-        uses: Xotl/cool-github-releases@v1
+      - name: 作为最新发布
+        uses: ncipollo/release-action@v1
         with:
-          mode: update
-          isPrerelease: false
-          tag_name: latest
-          release_name: "最新版傻妞"
-          body_mrkdwn: ""
-          assets: binary/*
-          github_token: ${{ github.token }}
+          allowUpdates: "true"
+          name: "最新版傻妞"
+          tag: "latest"
+          bodyFile: "binary/"
+          token: ${{ secrets.GITHUB_TOKEN }}

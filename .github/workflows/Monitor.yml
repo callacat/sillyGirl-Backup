@@ -4,8 +4,9 @@ on:
   # push:
   #   paths:
   #     - '.github/workflows/Monitor.yml'
-  schedule:
-    - cron: '12 */6 * * *'   # 每6小时执行一次
+#   schedule:
+#     - cron: '12 */6 * * *'   # 每6小时执行一次
+  workflow_dispatch:
 
 jobs:
   monitor:

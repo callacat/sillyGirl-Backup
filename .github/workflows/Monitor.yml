@@ -58,7 +58,7 @@ jobs:
 
     - name: Push changes
       if: env.trigger_build == 'true'
-      uses: ad-m/github-push-action@v0.6.0
+      uses: ad-m/github-push-action@master
       with:
         branch: main
         github_token: ${{ secrets.PAT }}

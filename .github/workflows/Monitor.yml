@@ -62,3 +62,4 @@ jobs:
       with:
         branch: main
         github_token: ${{ secrets.PAT }}
+        force_with_lease: true

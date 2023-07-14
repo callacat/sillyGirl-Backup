@@ -18,8 +18,8 @@ jobs:
       run: |
         last_sha=$(cat last_sha.txt)
         latest_sha=$(curl -H "Authorization: token ${{ secrets.PAT }}" \
-                      https://api.github.com/repos/cdle/sillyGirl/commits/main \
-                      | jq -r '.[0].sha')
+              https://api.github.com/repos/cdle/binary/commits/main \
+              | grep -oP '(?<="sha": ")[^"]+' | head -n 1)
         if [[ $latest_sha != $last_sha ]]; then
           echo "New commit detected in other repository!"
           echo "$latest_sha" > last_sha.txt

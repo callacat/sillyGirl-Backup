@@ -1,36 +1,44 @@
 name: Monitor Other Repository
 
 on:
-  schedule:
-    - cron: '12 */6 * * *'   # 每6小时执行一次
+  # push:
+  #   paths:
+  #     - '.github/workflows/Monitor.yml'
+#   schedule:
+#     - cron: '12 */6 * * *'   # 每6小时执行一次
   workflow_dispatch:
 
 jobs:
   monitor:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+    - uses: actions/checkout@v2
+      with:
+        persist-credentials: false
+        fetch-depth: 0 
 
     - name: Check if other repository has new commits
       id: check_commit
       run: |
+        # Read the last SHA from the file
         last_sha=$(cat last_sha.txt)
         latest_sha=$(curl -H "Authorization: token ${{ secrets.PAT }}" \
-                      https://api.github.com/repos/cdle/sillyGirl/commits/main \
-                      | jq -r '.[0].sha')
+                      https://api.github.com/repos/cdle/binary/commits/main \
+                      | grep '"sha"' | head -n 1 | cut -d '"' -f 4)
         if [[ $latest_sha != $last_sha ]]; then
           echo "New commit detected in other repository!"
+          # Update the last SHA with the latest SHA
           echo "$latest_sha" > last_sha.txt
-          echo "::set-output name=trigger_build::true"
+          # Set output variable to true
+          echo "trigger_build=true" >> $GITHUB_ENV
         else
           echo "No new commit in other repository."
-          echo "::set-output name=trigger_build::false"
+          # Set output variable to false
+          echo "trigger_build=false" >> $GITHUB_ENV
         fi
 
     - name: Trigger build
-      if: steps.check_commit.outputs.trigger_build == 'true'
+      if: env.trigger_build == 'true'
       run: |
         curl -L \
           -X POST \
@@ -41,7 +49,7 @@ jobs:
           -d '{"event_type": "backup"}'
 
     - name: Commit changes
-      if: steps.check_commit.outputs.trigger_build == 'true'
+      if: env.trigger_build == 'true'
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
@@ -49,9 +57,9 @@ jobs:
         git commit -m "Update last_sha.txt"
 
     - name: Push changes
-      if: steps.check_commit.outputs.trigger_build == 'true'
+      if: env.trigger_build == 'true'
       uses: ad-m/github-push-action@master
       with:
         branch: main
-        github_token: ${{ secrets.PAT }}
+        github_token: ${{ secrets.GITHUB_TOKEN }}
         force_with_lease: true
